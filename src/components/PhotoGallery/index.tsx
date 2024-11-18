@@ -1,9 +1,9 @@
 import React from 'react';
-import { usePhotoGallery } from './PhotoGallery/usePhotoGallery';
-import Header from './PhotoGallery/Header';
-import GalleryContent from './PhotoGallery/GalleryContent';
-import PhotoModal from './PhotoModal';
-import SettingsModal from './settings/SettingsModal';
+import { usePhotoGallery } from './usePhotoGallery';
+import Header from './Header';
+import GalleryContent from './GalleryContent';
+import PhotoModal from '../PhotoModal';
+import SettingsModal from '../settings/SettingsModal';
 
 const PhotoGallery: React.FC = () => {
   const {

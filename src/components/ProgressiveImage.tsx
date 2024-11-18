@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 interface ProgressiveImageProps {
   src: string;
+  placeholderSrc: string;
   alt: string;
   className?: string;
   sizes?: string;
@@ -12,6 +13,7 @@ interface ProgressiveImageProps {
 
 const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   src,
+  placeholderSrc,
   alt,
   className = '',
   sizes,
@@ -20,21 +22,22 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
   fetchpriority = 'auto'
 }) => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [thumbnailUrl, setThumbnailUrl] = useState('');
+  const [currentSrc, setCurrentSrc] = useState(placeholderSrc);
 
   useEffect(() => {
-    // Generate tiny thumbnail URL (10px wide, very low quality)
-    const url = new URL(src);
-    url.searchParams.set('w', '10');
-    url.searchParams.set('q', '10');
-    setThumbnailUrl(url.toString());
+    const img = new Image();
+    img.src = src;
+    img.onload = () => {
+      setIsLoaded(true);
+      setCurrentSrc(src);
+    };
   }, [src]);
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      {/* Tiny blurred thumbnail */}
+      {/* Placeholder/blur image */}
       <img
-        src={thumbnailUrl}
+        src={placeholderSrc}
         alt=""
         aria-hidden="true"
         className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-300 ${
@@ -44,16 +47,17 @@ const ProgressiveImage: React.FC<ProgressiveImageProps> = ({
       
       {/* Main image */}
       <img
-        src={src}
+        src={currentSrc}
         alt={alt}
         sizes={sizes}
         srcSet={srcSet}
         loading={loading}
         fetchpriority={fetchpriority}
         onLoad={() => setIsLoaded(true)}
-        className={`${className} relative w-full h-full object-cover transition-opacity duration-500 ${
+        className={`${className} absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${
           isLoaded ? 'opacity-100' : 'opacity-0'
         }`}
+        decoding="async"
       />
     </div>
   );

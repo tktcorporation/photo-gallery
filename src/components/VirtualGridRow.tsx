@@ -3,7 +3,7 @@ import { Photo } from '../types/photo';
 import PhotoCard from './PhotoCard';
 
 interface VirtualGridRowProps {
-  items: (Photo | undefined)[];
+  photos: Photo[];
   start: number;
   height: number;
   isPriority?: boolean;
@@ -11,31 +11,58 @@ interface VirtualGridRowProps {
 }
 
 const VirtualGridRow: React.FC<VirtualGridRowProps> = React.memo(({ 
-  items, 
+  photos = [],
   start, 
   height,
   isPriority = false,
   onPhotoSelect
 }) => {
+  if (!photos || photos.length === 0) return null;
+
+  // Calculate relative widths for photos in the row
+  const totalAspectRatio = photos.reduce((sum, photo) => sum + (photo.width / photo.height), 0);
+  const containerWidth = 100; // percentage
+  const gapWidth = 1; // Increased gap between photos
+  const totalGapWidth = (photos.length - 1) * gapWidth;
+  const availableWidth = containerWidth - totalGapWidth;
+  
+  let currentPosition = 0;
+  const photoLayouts = photos.map((photo, index) => {
+    const aspectRatio = photo.width / photo.height;
+    const relativeWidth = (aspectRatio / totalAspectRatio) * availableWidth;
+    const layout = {
+      width: `${relativeWidth}%`,
+      left: `${currentPosition}%`,
+    };
+    currentPosition += relativeWidth + gapWidth;
+    return layout;
+  });
+
   return (
     <div
-      className="absolute left-0 right-0 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      className="absolute left-0 right-0 px-6" // Increased padding
       style={{
         transform: `translateY(${start}px)`,
         height: `${height}px`,
         willChange: 'transform',
       }}
     >
-      {items.map((item, index) => (
-        item ? (
-          <div key={item.id} className="h-[280px]">
-            <PhotoCard 
-              photo={item} 
-              priority={isPriority}
-              onSelect={onPhotoSelect}
-            />
-          </div>
-        ) : null
+      {photos.map((photo, index) => (
+        <div 
+          key={photo.id}
+          className="absolute top-0 bottom-2 transition-transform hover:z-10" // Added bottom margin
+          style={{
+            width: photoLayouts[index].width,
+            left: photoLayouts[index].left,
+          }}
+        >
+          <PhotoCard 
+            photo={photo}
+            layout={photo.width / photo.height > 1.2 ? 'horizontal' : 'vertical'}
+            priority={isPriority}
+            onSelect={onPhotoSelect}
+          />
+        </div>
       ))}
     </div>
   );

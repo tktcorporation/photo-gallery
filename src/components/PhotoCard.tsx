@@ -8,82 +8,57 @@ interface PhotoCardProps {
   photo: Photo;
   priority?: boolean;
   onSelect: (photo: Photo) => void;
+  layout: 'vertical' | 'horizontal';
 }
 
-const PhotoCard: React.FC<PhotoCardProps> = memo(({ photo, priority = false, onSelect }) => {
+const PhotoCard: React.FC<PhotoCardProps> = memo(({ photo, priority = false, onSelect, layout }) => {
   const [ref, entry] = useIntersectionObserver({
     threshold: 0,
     rootMargin: '200px',
   });
 
   const shouldLoad = priority || (entry?.isIntersecting ?? false);
-
-  const thumbnailSizes = {
-    sm: '180w',
-    md: '280w',
-    lg: '380w'
-  };
-
-  const generateOptimizedUrl = (baseUrl: string, width: number, format: string) => {
-    return `${baseUrl}?w=${width}&q=40&fm=${format}&fit=crop`;
-  };
+  const placeholderUrl = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 ${photo.width} ${photo.height}'%3E%3Crect width='100%25' height='100%25' fill='%23f3f4f6'/%3E%3C/svg%3E`;
 
   return (
     <div 
       ref={ref}
-      className="h-full group relative bg-white rounded-lg shadow-md overflow-hidden cursor-pointer transform transition-transform hover:scale-[1.02]"
+      className="group relative w-full bg-gray-100 dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden cursor-pointer transform transition-all duration-300 hover:shadow-md hover:scale-[1.02]"
       onClick={() => onSelect(photo)}
+      style={{
+        aspectRatio: `${photo.width} / ${photo.height}`,
+      }}
     >
-      <div className="h-full">
-        {shouldLoad ? (
-          <picture>
-            <source
-              type="image/avif"
-              srcSet={`
-                ${generateOptimizedUrl(photo.url, 180, 'avif')} ${thumbnailSizes.sm},
-                ${generateOptimizedUrl(photo.url, 280, 'avif')} ${thumbnailSizes.md},
-                ${generateOptimizedUrl(photo.url, 380, 'avif')} ${thumbnailSizes.lg}
-              `}
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-            />
-            <source
-              type="image/webp"
-              srcSet={`
-                ${generateOptimizedUrl(photo.url, 180, 'webp')} ${thumbnailSizes.sm},
-                ${generateOptimizedUrl(photo.url, 280, 'webp')} ${thumbnailSizes.md},
-                ${generateOptimizedUrl(photo.url, 380, 'webp')} ${thumbnailSizes.lg}
-              `}
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-            />
-            <ProgressiveImage
-              src={generateOptimizedUrl(photo.url, 180, 'jpg')}
-              alt={photo.title}
-              className="w-full h-full object-cover"
-              loading={priority ? "eager" : "lazy"}
-              fetchpriority={priority ? "high" : "auto"}
-              srcSet={`
-                ${generateOptimizedUrl(photo.url, 180, 'jpg')} ${thumbnailSizes.sm},
-                ${generateOptimizedUrl(photo.url, 280, 'jpg')} ${thumbnailSizes.md},
-                ${generateOptimizedUrl(photo.url, 380, 'jpg')} ${thumbnailSizes.lg}
-              `}
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
-            />
-          </picture>
-        ) : (
-          <div className="w-full h-full bg-gray-100 animate-pulse" />
-        )}
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-        <h3 className="text-white font-semibold truncate">{photo.title}</h3>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {photo.tags.slice(0, 3).map((tag, index) => (
-            <span
-              key={index}
-              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/20 text-white"
-            >
-              {tag}
-            </span>
-          ))}
+      {shouldLoad ? (
+        <ProgressiveImage
+          src={photo.url}
+          placeholderSrc={placeholderUrl}
+          alt={photo.title}
+          className="absolute inset-0 w-full h-full object-cover"
+          loading={priority ? "eager" : "lazy"}
+          fetchpriority={priority ? "high" : "auto"}
+          sizes={`(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw`}
+        />
+      ) : (
+        <div 
+          className="absolute inset-0 bg-gray-100 dark:bg-gray-800 animate-pulse"
+          style={{ aspectRatio: `${photo.width / photo.height}` }}
+        />
+      )}
+      
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="absolute bottom-0 left-0 right-0 p-3">
+          <h3 className="text-white font-semibold truncate text-sm">{photo.title}</h3>
+          <div className="mt-1.5 flex flex-wrap gap-1.5">
+            {photo.tags.slice(0, 3).map((tag, index) => (
+              <span
+                key={index}
+                className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-white/20 text-white"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </div>
