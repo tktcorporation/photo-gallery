@@ -6,6 +6,7 @@ export default {
     loading: 'Loading...',
     noPhotosFound: 'No photos found',
     photos: 'photos',
+    refresh: 'Check for new photos',
     search: {
       placeholder: 'Search photos...'
     }

@@ -1,8 +1,9 @@
 import React, { memo } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, RefreshCw } from 'lucide-react';
 import SearchBar from '../SearchBar';
 import { useCurrentGroup } from './useCurrentGroup';
 import { useI18n } from '../../i18n/store';
+import { usePhotoSource } from '../../hooks/usePhotoSource';
 
 interface HeaderProps {
   searchQuery: string;
@@ -19,6 +20,13 @@ const Header = memo(({
 }: HeaderProps) => {
   const { t } = useI18n();
   const { currentGroup } = useCurrentGroup();
+  const { refreshPhotos, isRefreshing } = usePhotoSource();
+
+  const handleRefresh = async () => {
+    if (!isRefreshing) {
+      await refreshPhotos();
+    }
+  };
 
   return (
     <header className="flex-none bg-white dark:bg-gray-800 shadow-sm z-50 sticky top-0">
@@ -29,6 +37,19 @@ const Header = memo(({
           </h1>
           <div className="flex items-center gap-4">
             <SearchBar onSearch={setSearchQuery} />
+            <button
+              onClick={handleRefresh}
+              disabled={isRefreshing}
+              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
+              aria-label={t('common.refresh')}
+              title={t('common.refresh')}
+            >
+              <RefreshCw 
+                className={`h-5 w-5 text-gray-500 dark:text-gray-400 ${
+                  isRefreshing ? 'animate-spin' : ''
+                }`}
+              />
+            </button>
             <button
               onClick={onOpenSettings}
               className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

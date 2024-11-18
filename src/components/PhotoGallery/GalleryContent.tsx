@@ -6,6 +6,7 @@ import { useGroupInView } from './useGroupInView';
 import { usePhotoSource } from '../../hooks/usePhotoSource';
 import { usePullToRefresh } from '../../hooks/usePullToRefresh';
 import { RefreshCw } from 'lucide-react';
+import { useI18n } from '../../i18n/store';
 
 interface GroupedPhotos {
   photos: Photo[];
@@ -23,21 +24,23 @@ const GalleryContent = memo(({ groupedPhotos, onPhotoSelect }: GalleryContentPro
   const contentRef = useRef<HTMLDivElement>(null);
   const { groupRefs } = useGroupInView(contentRef, Object.keys(groupedPhotos));
   const { refreshPhotos, isRefreshing } = usePhotoSource();
+  const { t } = useI18n();
   const { refreshIndicatorRef, pullProgress } = usePullToRefresh({
     onRefresh: refreshPhotos,
-    isRefreshing
+    isRefreshing,
+    containerRef: contentRef
   });
 
   return (
     <main 
       ref={contentRef}
-      className="flex-1 overflow-x-hidden relative"
+      className="flex-1 overflow-y-auto relative"
     >
       {/* Pull-to-refresh indicator */}
       <div
         ref={refreshIndicatorRef}
         className="absolute left-0 right-0 -top-16 flex items-center justify-center h-16 pointer-events-none transition-transform duration-200"
-        style={{ transform: 'translateY(0)' }}
+        style={{ transform: `translateY(${pullProgress * 64}px)` }}
       >
         <div className="flex items-center space-x-2 text-gray-500 dark:text-gray-400">
           <RefreshCw 
@@ -49,7 +52,12 @@ const GalleryContent = memo(({ groupedPhotos, onPhotoSelect }: GalleryContentPro
             }}
           />
           <span className="text-sm">
-            {isRefreshing ? '更新中...' : pullProgress >= 1 ? '指を離して更新' : '引っ張って更新'}
+            {isRefreshing 
+              ? t('pullToRefresh.refreshing')
+              : pullProgress >= 1 
+                ? t('pullToRefresh.release')
+                : t('pullToRefresh.pull')
+            }
           </span>
         </div>
       </div>
@@ -93,7 +101,7 @@ const GalleryContent = memo(({ groupedPhotos, onPhotoSelect }: GalleryContentPro
       >
         <div className="bg-gray-800/90 dark:bg-gray-900/90 text-white px-4 py-2 rounded-full shadow-lg flex items-center space-x-2">
           <RefreshCw className="h-4 w-4 animate-spin" />
-          <span className="text-sm">新しい写真を確認中...</span>
+          <span className="text-sm">{t('pullToRefresh.checking')}</span>
         </div>
       </div>
     </main>

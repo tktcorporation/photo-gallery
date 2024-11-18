@@ -5,7 +5,7 @@ import { ThemeProvider } from './contexts/ThemeContext';
 function App() {
   return (
     <ThemeProvider>
-      <div className="h-screen overflow-hidden bg-white dark:bg-gray-900">
+      <div className="h-screen flex flex-col overflow-hidden bg-white dark:bg-gray-900">
         <PhotoGallery />
       </div>
     </ThemeProvider>

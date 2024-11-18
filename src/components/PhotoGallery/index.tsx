@@ -17,7 +17,7 @@ const PhotoGallery: React.FC = () => {
   } = usePhotoGallery();
 
   return (
-    <div className="h-full flex flex-col">
+    <>
       <Header
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -40,7 +40,7 @@ const PhotoGallery: React.FC = () => {
       {showSettings && (
         <SettingsModal onClose={() => setShowSettings(false)} />
       )}
-    </div>
+    </>
   );
 };
 

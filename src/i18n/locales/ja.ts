@@ -6,6 +6,7 @@ export default {
     loading: '読み込み中...',
     noPhotosFound: '写真が見つかりませんでした',
     photos: '枚',
+    refresh: '新しい写真を確認',
     search: {
       placeholder: '写真を検索...'
     }

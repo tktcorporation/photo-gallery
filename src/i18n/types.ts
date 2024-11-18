@@ -8,6 +8,7 @@ export interface Translations {
     loading: string;
     noPhotosFound: string;
     photos: string;
+    refresh: string;
     search: {
       placeholder: string;
     };
